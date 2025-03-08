@@ -11,6 +11,9 @@
 		B41EF5052D7C9D4800AE7B73 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF5012D7C9A8200AE7B73 /* ViewModel.swift */; };
 		B41EF5062D7C9D5000AE7B73 /* Titles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF5042D7C9CB100AE7B73 /* Titles.swift */; };
 		B41EF5072D7C9D5500AE7B73 /* FileDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF4FF2D7C9A3000AE7B73 /* FileDownloader.swift */; };
+		B41EF5092D7CA89A00AE7B73 /* GameDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF5082D7CA89A00AE7B73 /* GameDetail.swift */; };
+		B41EF50B2D7CA8F500AE7B73 /* GameDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF50A2D7CA8F500AE7B73 /* GameDetailView.swift */; };
+		B41EF50E2D7CA9FD00AE7B73 /* SDWebImageSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = B41EF50D2D7CA9FD00AE7B73 /* SDWebImageSwiftUI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -19,11 +22,26 @@
 		B41EF4FF2D7C9A3000AE7B73 /* FileDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDownloader.swift; sourceTree = "<group>"; };
 		B41EF5012D7C9A8200AE7B73 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
 		B41EF5042D7C9CB100AE7B73 /* Titles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Titles.swift; sourceTree = "<group>"; };
+		B41EF5082D7CA89A00AE7B73 /* GameDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDetail.swift; sourceTree = "<group>"; };
+		B41EF50A2D7CA8F500AE7B73 /* GameDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		B41EF5182D7CB86800AE7B73 /* Exceptions for "NX-Content" folder in "NX-Content" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = B41EF4E82D7C937F00AE7B73 /* NX-Content */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		B41EF4EB2D7C937F00AE7B73 /* NX-Content */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				B41EF5182D7CB86800AE7B73 /* Exceptions for "NX-Content" folder in "NX-Content" target */,
+			);
 			path = "NX-Content";
 			sourceTree = "<group>";
 		};
@@ -34,6 +52,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B41EF50E2D7CA9FD00AE7B73 /* SDWebImageSwiftUI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,6 +83,7 @@
 			isa = PBXGroup;
 			children = (
 				B41EF4FC2D7C93E700AE7B73 /* GameListView.swift */,
+				B41EF50A2D7CA8F500AE7B73 /* GameDetailView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -88,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				B41EF5042D7C9CB100AE7B73 /* Titles.swift */,
+				B41EF5082D7CA89A00AE7B73 /* GameDetail.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -112,6 +133,7 @@
 			);
 			name = "NX-Content";
 			packageProductDependencies = (
+				B41EF50D2D7CA9FD00AE7B73 /* SDWebImageSwiftUI */,
 			);
 			productName = "NX-Content";
 			productReference = B41EF4E92D7C937F00AE7B73 /* NX-Content.app */;
@@ -141,6 +163,9 @@
 			);
 			mainGroup = B41EF4E02D7C937E00AE7B73;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B41EF50C2D7CA9FD00AE7B73 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = B41EF4EA2D7C937F00AE7B73 /* Products */;
 			projectDirPath = "";
@@ -167,8 +192,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				B41EF5072D7C9D5500AE7B73 /* FileDownloader.swift in Sources */,
+				B41EF50B2D7CA8F500AE7B73 /* GameDetailView.swift in Sources */,
 				B41EF5052D7C9D4800AE7B73 /* ViewModel.swift in Sources */,
 				B41EF4FD2D7C93E700AE7B73 /* GameListView.swift in Sources */,
+				B41EF5092D7CA89A00AE7B73 /* GameDetail.swift in Sources */,
 				B41EF5062D7C9D5000AE7B73 /* Titles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -303,6 +330,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "NX-Content/Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -342,6 +370,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "NX-Content/Info.plist";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -390,6 +419,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B41EF50C2D7CA9FD00AE7B73 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SDWebImage/SDWebImageSwiftUI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.1.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B41EF50D2D7CA9FD00AE7B73 /* SDWebImageSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B41EF50C2D7CA9FD00AE7B73 /* XCRemoteSwiftPackageReference "SDWebImageSwiftUI" */;
+			productName = SDWebImageSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B41EF4E12D7C937E00AE7B73 /* Project object */;
 }

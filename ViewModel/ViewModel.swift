@@ -7,22 +7,50 @@
 import Combine
 import Foundation
 
+enum APIError: LocalizedError {
+    case invalidRequestError(String)
+    case transportError(Error)
+    case decodeError(String)
+}
+
 class ViewModel: ObservableObject {
     @Published var games: [Game] = [] // Store the parsed games
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var showDownloadButton = false // Controls visibility of the download button
+    @Published var searchText = "" // Search query
+    @Published var gameDetail: GameDetail? // Store the fetched game details
+    @Published var isFetchingDetails = false // Loading state for game details
+    @Published var isFetchingScreenshots = false // Loading state for screenshots
+    var totalTitles: Int {
+        return filteredGames.count
+    }
     
     private let fileName = "titles_db.json"
-
+    
     private var fileURL: URL? {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent(fileName)
     }
     
     private var cancellables = Set<AnyCancellable>()
     
+    // Computed property to filter games based on search text
+    var filteredGames: [Game] {
+        if searchText.isEmpty {
+            return games // Return all games if search text is empty
+        } else {
+            return games.filter { game in
+                game.gameName.localizedCaseInsensitiveContains(searchText)
+            }
+        }
+    }
+    
     // Check if the file exists locally
     func checkLocalFile() {
+        
+        guard games.isEmpty else {
+            return
+        }
         guard let fileURL = fileURL else {
             showDownloadButton = true
             return
@@ -100,6 +128,57 @@ class ViewModel: ObservableObject {
             }
         } catch {
             errorMessage = "Failed to parse JSON: \(error.localizedDescription)"
+        }
+    }
+    
+    // Fetch game details from the API
+    func fetchGameDetails(gameID: String) {
+        guard let url = URL(string: "https://api.nlib.cc/nx/\(gameID)") else {
+            errorMessage = "Invalid URL"
+            return
+        }
+        
+        isFetchingDetails = true
+        errorMessage = nil
+        
+        URLSession.shared.dataTaskPublisher(for: url)
+            .map(\.data)
+            .tryMap { data -> GameDetail in
+              let decoder = JSONDecoder()
+              do {
+                return try decoder.decode(GameDetail.self,
+                                          from: data)
+              }
+              catch {
+                  throw APIError.decodeError(error.localizedDescription)
+              }
+            }
+        
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { [weak self] completion in
+                self?.isFetchingDetails = false
+                switch completion {
+                case .failure(let error):
+                    self?.errorMessage = "Failed to fetch game details: \(error.localizedDescription)"
+                case .finished:
+                    break
+                }
+            }, receiveValue: { [weak self] gameDetail in
+                self?.gameDetail = gameDetail
+                if let screenshots = gameDetail.screens?.screenshots {
+                    self?.fetchScreenshots(screenshots: screenshots) // Fetch screenshots
+                }
+            })
+            .store(in: &cancellables)
+    }
+    
+    // Fetch screenshots
+    private func fetchScreenshots(screenshots: [String]) {
+        isFetchingScreenshots = true
+        
+        // Simulate a delay for loading screenshots (optional)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [weak self] in
+            self?.isFetchingScreenshots = false
         }
     }
 }
