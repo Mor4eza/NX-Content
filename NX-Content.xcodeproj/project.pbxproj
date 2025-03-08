@@ -6,8 +6,19 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B41EF4FD2D7C93E700AE7B73 /* GameListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF4FC2D7C93E700AE7B73 /* GameListView.swift */; };
+		B41EF5052D7C9D4800AE7B73 /* ViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF5012D7C9A8200AE7B73 /* ViewModel.swift */; };
+		B41EF5062D7C9D5000AE7B73 /* Titles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF5042D7C9CB100AE7B73 /* Titles.swift */; };
+		B41EF5072D7C9D5500AE7B73 /* FileDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF4FF2D7C9A3000AE7B73 /* FileDownloader.swift */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		B41EF4E92D7C937F00AE7B73 /* NX-Content.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "NX-Content.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B41EF4FC2D7C93E700AE7B73 /* GameListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameListView.swift; sourceTree = "<group>"; };
+		B41EF4FF2D7C9A3000AE7B73 /* FileDownloader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDownloader.swift; sourceTree = "<group>"; };
+		B41EF5012D7C9A8200AE7B73 /* ViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel.swift; sourceTree = "<group>"; };
+		B41EF5042D7C9CB100AE7B73 /* Titles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Titles.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -33,6 +44,10 @@
 			isa = PBXGroup;
 			children = (
 				B41EF4EB2D7C937F00AE7B73 /* NX-Content */,
+				B41EF4FE2D7C940C00AE7B73 /* Utils */,
+				B41EF5002D7C9A6A00AE7B73 /* ViewModel */,
+				B41EF4FB2D7C93C500AE7B73 /* Views */,
+				B41EF5022D7C9C7500AE7B73 /* Model */,
 				B41EF4EA2D7C937F00AE7B73 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +58,38 @@
 				B41EF4E92D7C937F00AE7B73 /* NX-Content.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		B41EF4FB2D7C93C500AE7B73 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				B41EF4FC2D7C93E700AE7B73 /* GameListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		B41EF4FE2D7C940C00AE7B73 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				B41EF4FF2D7C9A3000AE7B73 /* FileDownloader.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		B41EF5002D7C9A6A00AE7B73 /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+				B41EF5012D7C9A8200AE7B73 /* ViewModel.swift */,
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		B41EF5022D7C9C7500AE7B73 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				B41EF5042D7C9CB100AE7B73 /* Titles.swift */,
+			);
+			path = Model;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -119,6 +166,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B41EF5072D7C9D5500AE7B73 /* FileDownloader.swift in Sources */,
+				B41EF5052D7C9D4800AE7B73 /* ViewModel.swift in Sources */,
+				B41EF4FD2D7C93E700AE7B73 /* GameListView.swift in Sources */,
+				B41EF5062D7C9D5000AE7B73 /* Titles.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

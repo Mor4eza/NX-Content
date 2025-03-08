@@ -11,7 +11,7 @@ import SwiftUI
 struct NX_ContentApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            GameListView()
         }
     }
 }
