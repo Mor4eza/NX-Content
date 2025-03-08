@@ -6,6 +6,8 @@
 //
 
 import SwiftUI
+import SDWebImageSwiftUI
+import SDWebImage
 
 struct GameListView: View {
     @StateObject private var viewModel = ViewModel()
@@ -24,6 +26,24 @@ struct GameListView: View {
                             .font(.subheadline)) {
                                 ForEach(viewModel.filteredGames) { game in
                                     NavigationLink(destination: GameDetailView(game: game)) {
+                                        
+                                        // Game Icon
+                                        if let iconURL = game.iconURL {
+                                            WebImage(url: iconURL)
+                                                .resizable()
+                                                
+                                                .scaledToFit()
+                                                .frame(width: 50, height: 50)
+                                                .cornerRadius(8)
+                                        
+                                        } else {
+                                            Image(systemName: "questionmark.square.fill")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 50, height: 50)
+                                                .foregroundColor(.gray)
+                                        }
+                                        
                                         VStack(alignment: .leading, spacing: 8) {
                                             Text(game.gameName)
                                                 .font(.headline)

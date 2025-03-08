@@ -4,6 +4,7 @@
 //
 //  Created by Morteza on 3/8/25.
 //
+import Foundation
 
 struct Game: Identifiable, Codable {
     var id: String // Use the game ID as the unique identifier
@@ -68,4 +69,8 @@ struct Game: Identifiable, Codable {
             return String(format: "%.2f MB", sizeInMB)
         }
     }
+    
+    var iconURL: URL? {
+            return URL(string: "https://api.nlib.cc/nx/\(id)/icon/128/128")
+        }
 }
