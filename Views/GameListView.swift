@@ -12,7 +12,6 @@ import SDWebImageSwiftUI
 struct GameListView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel: ViewModel
-    @Query private var games: [Game]
     
     init() {
         let context = ModelContext(Persistence.shared.container)
@@ -22,33 +21,62 @@ struct GameListView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if games.isEmpty {
+                if viewModel.games.isEmpty && !viewModel.isLoading {
                     ContentUnavailableView("No Games Found", systemImage: "gamecontroller")
                 } else {
                     List {
-                        ForEach(filteredGames) { game in
+                        ForEach(viewModel.games) { game in
                             NavigationLink(destination: GameDetailView(game: game)) {
                                 GameRowView(game: game)
                             }
+                        }
+                        
+                        // Load more games when reaching the bottom
+                        if viewModel.hasMoreGames {
+                            ProgressView()
+                                .frame(maxWidth: .infinity, alignment: .center)
+                                .onAppear {
+                                    Task {
+                                        await viewModel.fetchGames()
+                                    }
+                                }
                         }
                     }
                 }
             }
             .navigationTitle("NX Games")
             .searchable(text: $viewModel.searchText)
+            .onChange(of: viewModel.searchText) { _, newValue in
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    Task {
+                        viewModel.resetPagination()
+                        await viewModel.fetchGames(searchText: newValue)
+                    }
+                }
+                
+            }
+            .task {
+                await viewModel.fetchGames() // Fetch the first page on app launch
+            }
+            
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Menu("Sort", systemImage: "arrow.up.arrow.down") {
                         ForEach(ViewModel.SortOption.allCases, id: \.self) { option in
                             Button(action: {
-                                viewModel.selectedSortOption = option
+                                Task {
+                                    viewModel.resetPagination()
+                                    viewModel.selectedSortOption = option
+                                    await viewModel.fetchGames()
+                                }
                             }) {
                                 Text(option.rawValue)
                                 if viewModel.selectedSortOption == option {
                                     Image(systemName: "checkmark")
                                 }
                             }
-                        
+                            
                         }
                     }
                 }
@@ -60,6 +88,7 @@ struct GameListView: View {
                     .disabled(viewModel.isLoading)
                 }
             }
+            
             .overlay {
                 if viewModel.isLoading {
                     ProgressView()
@@ -72,11 +101,6 @@ struct GameListView: View {
                 Text(viewModel.errorMessage ?? "")
             }
         }
-    }
-    
-    // Filtered games based on search text
-    private var filteredGames: [Game] {
-        viewModel.fetchGames(searchText: viewModel.searchText)
     }
 }
 
@@ -91,8 +115,17 @@ struct GameRowView: View {
     
     var body: some View {
         HStack(spacing: 12) {
-            WebImage(url: game.iconURL)
-                .resizable()
+            WebImage(url: game.iconURL) { image in
+                image.resizable()
+                
+            } placeholder: {
+                Image(systemName: "photo.badge.exclamationmark.fill")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 50, height: 50)
+                    .cornerRadius(8)
+            }
+                .indicator(.activity(style: .circular))
                 .scaledToFit()
                 .frame(width: 50, height: 50)
                 .cornerRadius(8)

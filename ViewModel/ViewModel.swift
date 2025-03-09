@@ -11,13 +11,18 @@ import SwiftData
 
 @MainActor
 class ViewModel: ObservableObject {
+    @Published var games: [Game] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var searchText = ""
     @Published var selectedSortOption: SortOption = .releaseDateDescending
     @Published var gameDetail: GameDetail?
+    @Published var hasMoreGames = true
+    
+    private var currentPage = 0
+    private let pageSize = 20 // Number of games to fetch per page
     private var modelContext: ModelContext
-
+    
     // Sorting options
     enum SortOption: String, CaseIterable {
         case nameAscending = "Name (A-Z)"
@@ -57,19 +62,29 @@ class ViewModel: ObservableObject {
         self.modelContext = modelContext
     }
     
-    func fetchGames(searchText: String) -> [Game] {
-        let descriptor = FetchDescriptor<Game>(
+    func fetchGames(searchText: String = "") async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        var descriptor = FetchDescriptor<Game>(
             predicate: searchText.isEmpty ? nil : #Predicate { game in
                 game.gameName.localizedStandardContains(searchText)
             },
             sortBy: [selectedSortOption.sortDescriptor]
         )
+        descriptor.fetchOffset = currentPage * pageSize
+        descriptor.fetchLimit = pageSize
         
         do {
-            return try modelContext.fetch(descriptor)
+            let newGames = try modelContext.fetch(descriptor)
+            if newGames.isEmpty {
+                hasMoreGames = false // No more games to load
+            } else {
+                games.append(contentsOf: newGames)
+                currentPage += 1
+            }
         } catch {
             errorMessage = "Failed to fetch games: \(error.localizedDescription)"
-            return []
         }
     }
     
@@ -139,5 +154,12 @@ class ViewModel: ObservableObject {
         } catch {
             errorMessage = "Failed to fetch game details: \(error.localizedDescription)"
         }
+    }
+    
+    // Reset pagination when search text changes
+    func resetPagination() {
+        currentPage = 0
+        games.removeAll()
+        hasMoreGames = true
     }
 }
