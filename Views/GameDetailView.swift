@@ -30,7 +30,8 @@ struct GameDetailView: View {
             }
             .padding()
         }
-        .navigationTitle(game.gameName)
+        .navigationTitle("Game Details")
+        .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.fetchGameDetails(gameID: game.id)
         }
@@ -49,11 +50,16 @@ struct GameDetailView: View {
                 Text(game.gameName)
                     .font(.largeTitle.bold())
                 
-                Text(game.version == "0" ? "Full Game" : "Demo")
-                    .font(.subheadline)
-                    .padding(.horizontal, 8)
-                    .background(Color.blue.opacity(0.2))
-                    .cornerRadius(4)
+                HStack {
+                    Text(game.version == "0" ? "Full Game" : "Demo")
+                        .font(.subheadline)
+                        .padding(.horizontal, 8)
+                        .background(Color.blue.opacity(0.2))
+                        .cornerRadius(4)
+                    
+                    Text(game.formattedSize)
+                        .font(.subheadline)
+                }
             }
         }
     }

@@ -14,48 +14,64 @@ class ViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var searchText = ""
-    @Published var selectedSortOption: SortOption = .releaseDate
+    @Published var selectedSortOption: SortOption = .releaseDateDescending
     @Published var gameDetail: GameDetail?
     private var modelContext: ModelContext
+
+    // Sorting options
+    enum SortOption: String, CaseIterable {
+        case nameAscending = "Name (A-Z)"
+        case nameDescending = "Name (Z-A)"
+        case releaseDateAscending = "Release Date (Oldest First)"
+        case releaseDateDescending = "Release Date (Newest First)"
+        case sizeAscending = "Size (Smallest First)"
+        case sizeDescending = "Size (Largest First)"
+        
+        // Returns the appropriate SortDescriptor for the selected option
+        var sortDescriptor: SortDescriptor<Game> {
+            switch self {
+            case .nameAscending:
+                return SortDescriptor(\Game.gameName, order: .forward)
+            case .nameDescending:
+                return SortDescriptor(\Game.gameName, order: .reverse)
+            case .releaseDateAscending:
+                return SortDescriptor(\Game.releaseDate, order: .forward)
+            case .releaseDateDescending:
+                return SortDescriptor(\Game.releaseDate, order: .reverse)
+            case .sizeAscending:
+                return SortDescriptor(\Game.size, order: .forward)
+            case .sizeDescending:
+                return SortDescriptor(\Game.size, order: .reverse)
+            }
+        }
+    }
+    
+    // Date formatter for parsing release dates
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
     
     init(modelContext: ModelContext) {
         self.modelContext = modelContext
     }
     
-    // Sorting options
-       enum SortOption: String, CaseIterable {
-           case name = "Name"
-           case releaseDate = "Release Date"
-           case size = "Size"
-           
-           // Returns the appropriate SortDescriptor for the selected option
-           var sortDescriptor: SortDescriptor<Game> {
-               switch self {
-               case .name:
-                   return SortDescriptor(\Game.gameName, order: .forward)
-               case .releaseDate:
-                   return SortDescriptor(\Game.releaseDate, order: .forward)
-               case .size:
-                   return SortDescriptor(\Game.size, order: .forward)
-               }
-           }
-       }
-
     func fetchGames(searchText: String) -> [Game] {
-            let descriptor = FetchDescriptor<Game>(
-                predicate: searchText.isEmpty ? nil : #Predicate { game in
-                    game.gameName.localizedStandardContains(searchText)
-                },
-                sortBy: [selectedSortOption.sortDescriptor]
-            )
-            
-            do {
-                return try modelContext.fetch(descriptor)
-            } catch {
-                errorMessage = "Failed to fetch games: \(error.localizedDescription)"
-                return []
-            }
+        let descriptor = FetchDescriptor<Game>(
+            predicate: searchText.isEmpty ? nil : #Predicate { game in
+                game.gameName.localizedStandardContains(searchText)
+            },
+            sortBy: [selectedSortOption.sortDescriptor]
+        )
+        
+        do {
+            return try modelContext.fetch(descriptor)
+        } catch {
+            errorMessage = "Failed to fetch games: \(error.localizedDescription)"
+            return []
         }
+    }
     
     func downloadGameData() async {
         isLoading = true
@@ -89,10 +105,10 @@ class ViewModel: ObservableObject {
         let (data, _) = try await URLSession.shared.data(from: url)
         let text = String(decoding: data, as: UTF8.self)
         
-        let dateMap = text.components(separatedBy: .newlines).reduce(into: [String: String]()) { result, line in
+        let dateMap = text.components(separatedBy: .newlines).reduce(into: [String: Date]()) { result, line in
             let components = line.components(separatedBy: "|")
-            if components.count >= 2 {
-                result[components[0]] = components[1]
+            if components.count >= 2, let date = dateFormatter.date(from: components[1]) {
+                result[components[0]] = date
             }
         }
         
@@ -105,23 +121,23 @@ class ViewModel: ObservableObject {
     
     
     // Fetch game details from the API
-        func fetchGameDetails(gameID: String) async {
-            isLoading = true
-            defer { isLoading = false }
-            
-            let urlString = "https://api.nlib.cc/nx/\(gameID)"
-            guard let url = URL(string: urlString) else {
-                errorMessage = "Invalid URL"
-                return
-            }
-            
-            do {
-                let (data, _) = try await URLSession.shared.data(from: url)
-                let decoder = JSONDecoder()
-                let gameDetail = try decoder.decode(GameDetail.self, from: data)
-                self.gameDetail = gameDetail
-            } catch {
-                errorMessage = "Failed to fetch game details: \(error.localizedDescription)"
-            }
+    func fetchGameDetails(gameID: String) async {
+        isLoading = true
+        defer { isLoading = false }
+        
+        let urlString = "https://api.nlib.cc/nx/\(gameID)"
+        guard let url = URL(string: urlString) else {
+            errorMessage = "Invalid URL"
+            return
         }
+        
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoder = JSONDecoder()
+            let gameDetail = try decoder.decode(GameDetail.self, from: data)
+            self.gameDetail = gameDetail
+        } catch {
+            errorMessage = "Failed to fetch game details: \(error.localizedDescription)"
+        }
+    }
 }

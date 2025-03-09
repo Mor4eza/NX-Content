@@ -40,9 +40,15 @@ struct GameListView: View {
                 ToolbarItem(placement: .primaryAction) {
                     Menu("Sort", systemImage: "arrow.up.arrow.down") {
                         ForEach(ViewModel.SortOption.allCases, id: \.self) { option in
-                            Button(option.rawValue) {
+                            Button(action: {
                                 viewModel.selectedSortOption = option
+                            }) {
+                                Text(option.rawValue)
+                                if viewModel.selectedSortOption == option {
+                                    Image(systemName: "checkmark")
+                                }
                             }
+                        
                         }
                     }
                 }
@@ -77,6 +83,12 @@ struct GameListView: View {
 struct GameRowView: View {
     let game: Game
     
+    private let dateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }()
+    
     var body: some View {
         HStack(spacing: 12) {
             WebImage(url: game.iconURL)
@@ -93,7 +105,7 @@ struct GameRowView: View {
                     Text("v\(game.version)")
                     Text(game.formattedSize)
                     if let date = game.releaseDate {
-                        Text(date)
+                        Text(dateFormatter.string(from: date))
                     }
                 }
                 .font(.caption)

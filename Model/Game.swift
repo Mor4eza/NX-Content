@@ -10,10 +10,10 @@ import SwiftData
 @Model
 final class Game: Identifiable, Decodable {
     @Attribute(.unique) var id: String
-    var gameName: String
+    var gameName: String 
     var version: String
     var size: Int
-    var releaseDate: String?
+    var releaseDate: Date?
     
     enum CodingKeys: String, CodingKey {
         case gameName = "Game Name"
@@ -21,7 +21,7 @@ final class Game: Identifiable, Decodable {
         case size = "Size"
     }
     
-    init(id: String, gameName: String, version: String, size: Int, releaseDate: String? = nil) {
+    init(id: String, gameName: String, version: String, size: Int, releaseDate: Date? = nil) {
         self.id = id
         self.gameName = gameName
         self.version = version
