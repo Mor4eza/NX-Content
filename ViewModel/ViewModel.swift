@@ -22,6 +22,8 @@ class ViewModel: ObservableObject {
     @Published var gameDetail: GameDetail? // Store the fetched game details
     @Published var isFetchingDetails = false // Loading state for game details
     @Published var isFetchingScreenshots = false // Loading state for screenshots
+    @Published var selectedSortOption: SortOption = .releaseDate
+    
     var totalTitles: Int {
         return filteredGames.count
     }
@@ -39,9 +41,27 @@ class ViewModel: ObservableObject {
         if searchText.isEmpty {
             return games // Return all games if search text is empty
         } else {
-            return games.filter { game in
-                game.gameName.localizedCaseInsensitiveContains(searchText)
-            }
+            let filtered = searchText.isEmpty ? games : games.filter { $0.gameName.localizedCaseInsensitiveContains(searchText) }
+            return sortGames(filtered)
+        }
+    }
+    
+    // Sorting state
+    enum SortOption: String, CaseIterable {
+        case name = "Name"
+        case releaseDate = "Release Date"
+        case size = "Size"
+    }
+    
+    
+    private func sortGames(_ games: [Game]) -> [Game] {
+        switch selectedSortOption {
+        case .name:
+            return filteredGames.sorted { $0.gameName < $1.gameName }
+        case .releaseDate:
+            return filteredGames.sorted { $0.gameName < $1.gameName } //fixme: fix to sort with release date
+        case .size:
+            return filteredGames.sorted { $0.size < $1.size }
         }
     }
     
@@ -144,14 +164,14 @@ class ViewModel: ObservableObject {
         URLSession.shared.dataTaskPublisher(for: url)
             .map(\.data)
             .tryMap { data -> GameDetail in
-              let decoder = JSONDecoder()
-              do {
-                return try decoder.decode(GameDetail.self,
-                                          from: data)
-              }
-              catch {
-                  throw APIError.decodeError(error.localizedDescription)
-              }
+                let decoder = JSONDecoder()
+                do {
+                    return try decoder.decode(GameDetail.self,
+                                              from: data)
+                }
+                catch {
+                    throw APIError.decodeError(error.localizedDescription)
+                }
             }
         
             .receive(on: DispatchQueue.main)

@@ -5,9 +5,9 @@
 //  Created by Morteza on 3/8/25.
 //
 
-import SwiftUI
-import SDWebImageSwiftUI
 import SDWebImage
+import SDWebImageSwiftUI
+import SwiftUI
 
 struct GameListView: View {
     @StateObject private var viewModel = ViewModel()
@@ -23,44 +23,43 @@ struct GameListView: View {
                 } else if !viewModel.games.isEmpty {
                     List {
                         Section(header: Text("Total Titles: \(viewModel.totalTitles)")
-                            .font(.subheadline)) {
-                                ForEach(viewModel.filteredGames) { game in
-                                    NavigationLink(destination: GameDetailView(game: game)) {
+                            .font(.subheadline))
+                        {
+                            ForEach(viewModel.filteredGames) { game in
+                                NavigationLink(destination: GameDetailView(game: game)) {
+                                    // Game Icon
+                                    if let iconURL = game.iconURL {
+                                        WebImage(url: iconURL)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 50, height: 50)
+                                            .cornerRadius(8)
                                         
-                                        // Game Icon
-                                        if let iconURL = game.iconURL {
-                                            WebImage(url: iconURL)
-                                                .resizable()
-                                                
-                                                .scaledToFit()
-                                                .frame(width: 50, height: 50)
-                                                .cornerRadius(8)
-                                        
-                                        } else {
-                                            Image(systemName: "questionmark.square.fill")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .frame(width: 50, height: 50)
-                                                .foregroundColor(.gray)
-                                        }
-                                        
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            Text(game.gameName)
-                                                .font(.headline)
-                                            Text("Version: \(game.version)")
-                                                .font(.subheadline)
-                                            Text("Size: \(game.formattedSize)")
-                                                .font(.subheadline)
-                                        }
+                                    } else {
+                                        Image(systemName: "questionmark.square.fill")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 50, height: 50)
+                                            .foregroundColor(.gray)
+                                    }
+                                    
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        Text(game.gameName)
+                                            .font(.headline)
+                                        Text("Version: \(game.version)")
+                                            .font(.subheadline)
+                                        Text("Size: \(game.formattedSize)")
+                                            .font(.subheadline)
                                     }
                                 }
                             }
+                        }
                     }
-                    #if os(iOS)
+#if os(iOS)
                     .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search games")
-                    #elseif os(macOS)
+#elseif os(macOS)
                     .searchable(text: $viewModel.searchText, prompt: "Search games")
-                    #endif
+#endif
                 } else if viewModel.showDownloadButton {
                     Button(action: {
                         viewModel.downloadAndParseJSON()
@@ -77,6 +76,25 @@ struct GameListView: View {
             }
             .padding()
             .navigationTitle("Game Library")
+            .toolbar {
+                // Sort Button
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Menu {
+                        ForEach(ViewModel.SortOption.allCases, id: \.self) { option in
+                            Button(action: {
+                                viewModel.selectedSortOption = option
+                            }) {
+                                Text(option.rawValue)
+                                if viewModel.selectedSortOption == option {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    } label: {
+                        Label("Sort", systemImage: "arrow.up.arrow.down")
+                    }
+                }
+            }
             .onAppear {
                 viewModel.checkLocalFile() // Check for local file when the view appears
             }

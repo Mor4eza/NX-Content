@@ -17,9 +17,19 @@ struct GameDetailView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
                 // Header
-                Text(game.gameName)
-                    .font(.largeTitle)
-                    .bold()
+                
+                HStack {
+                    WebImage(url: game.iconURL)
+                        .resizable()
+                    .scaledToFit()
+                    .frame(width: 50, height: 50)
+                    .cornerRadius(8)
+                    
+                    Text(game.gameName)
+                        .font(.largeTitle)
+                        .bold()
+                }
+                
                 
                 // Metadata
                 HStack {
@@ -95,7 +105,7 @@ struct GameDetailView: View {
             }
             .padding()
         }
-        .navigationTitle("Game Details")
+//        .navigationTitle(game.gameName)
         .onAppear {
             viewModel.fetchGameDetails(gameID: game.id) // Fetch details when the view appears
         }
