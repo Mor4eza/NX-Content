@@ -13,5 +13,6 @@ struct NX_ContentApp: App {
         WindowGroup {
             GameListView()
         }
+        .modelContainer(for: Game.self)
     }
 }

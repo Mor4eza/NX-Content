@@ -4,104 +4,101 @@
 //
 //  Created by Morteza on 3/8/25.
 //
-
+import SwiftUI
+import SwiftData
 import SDWebImage
 import SDWebImageSwiftUI
-import SwiftUI
 
 struct GameListView: View {
-    @StateObject private var viewModel = ViewModel()
+    @Environment(\.modelContext) private var modelContext
+    @StateObject private var viewModel: ViewModel
+    @Query private var games: [Game]
+    
+    init() {
+        let context = ModelContext(Persistence.shared.container)
+        _viewModel = StateObject(wrappedValue: ViewModel(modelContext: context))
+    }
     
     var body: some View {
-        NavigationView {
-            VStack {
-                if viewModel.isLoading {
-                    ProgressView("Downloading Game List...")
-                } else if let errorMessage = viewModel.errorMessage {
-                    Text("Error: \(errorMessage)")
-                        .foregroundColor(.red)
-                } else if !viewModel.games.isEmpty {
-                    List {
-                        Section(header: Text("Total Titles: \(viewModel.totalTitles)")
-                            .font(.subheadline))
-                        {
-                            ForEach(viewModel.filteredGames) { game in
-                                NavigationLink(destination: GameDetailView(game: game)) {
-                                    // Game Icon
-                                    if let iconURL = game.iconURL {
-                                        WebImage(url: iconURL)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 50, height: 50)
-                                            .cornerRadius(8)
-                                        
-                                    } else {
-                                        Image(systemName: "questionmark.square.fill")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 50, height: 50)
-                                            .foregroundColor(.gray)
-                                    }
-                                    
-                                    VStack(alignment: .leading, spacing: 8) {
-                                        Text(game.gameName)
-                                            .font(.headline)
-                                        Text("Version: \(game.version)")
-                                            .font(.subheadline)
-                                        Text("Size: \(game.formattedSize)")
-                                            .font(.subheadline)
-                                    }
-                                }
-                            }
-                        }
-                    }
-#if os(iOS)
-                    .searchable(text: $viewModel.searchText, placement: .navigationBarDrawer(displayMode: .always), prompt: "Search games")
-#elseif os(macOS)
-                    .searchable(text: $viewModel.searchText, prompt: "Search games")
-#endif
-                } else if viewModel.showDownloadButton {
-                    Button(action: {
-                        viewModel.downloadAndParseJSON()
-                    }) {
-                        Text("Download Game Titles")
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(8)
-                    }
+        NavigationStack {
+            Group {
+                if games.isEmpty {
+                    ContentUnavailableView("No Games Found", systemImage: "gamecontroller")
                 } else {
-                    Text("No data available")
-                }
-            }
-            .padding()
-            .navigationTitle("Game Library")
-            .toolbar {
-                // Sort Button
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Menu {
-                        ForEach(ViewModel.SortOption.allCases, id: \.self) { option in
-                            Button(action: {
-                                viewModel.selectedSortOption = option
-                            }) {
-                                Text(option.rawValue)
-                                if viewModel.selectedSortOption == option {
-                                    Image(systemName: "checkmark")
-                                }
+                    List {
+                        ForEach(filteredGames) { game in
+                            NavigationLink(destination: GameDetailView(game: game)) {
+                                GameRowView(game: game)
                             }
                         }
-                    } label: {
-                        Label("Sort", systemImage: "arrow.up.arrow.down")
                     }
                 }
             }
-            .onAppear {
-                viewModel.checkLocalFile() // Check for local file when the view appears
+            .navigationTitle("NX Games")
+            .searchable(text: $viewModel.searchText)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Menu("Sort", systemImage: "arrow.up.arrow.down") {
+                        ForEach(ViewModel.SortOption.allCases, id: \.self) { option in
+                            Button(option.rawValue) {
+                                viewModel.selectedSortOption = option
+                            }
+                        }
+                    }
+                }
+                
+                ToolbarItem(placement: .bottomBar) {
+                    Button("Refresh Data") {
+                        Task { await viewModel.downloadGameData() }
+                    }
+                    .disabled(viewModel.isLoading)
+                }
+            }
+            .overlay {
+                if viewModel.isLoading {
+                    ProgressView()
+                        .scaleEffect(2)
+                }
+            }
+            .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
+                Button("OK") { viewModel.errorMessage = nil }
+            } message: {
+                Text(viewModel.errorMessage ?? "")
             }
         }
     }
+    
+    // Filtered games based on search text
+    private var filteredGames: [Game] {
+        viewModel.fetchGames(searchText: viewModel.searchText)
+    }
 }
 
-#Preview {
-    GameListView()
+struct GameRowView: View {
+    let game: Game
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            WebImage(url: game.iconURL)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 50, height: 50)
+                .cornerRadius(8)
+            
+            VStack(alignment: .leading, spacing: 4) {
+                Text(game.gameName)
+                    .font(.headline)
+                
+                HStack(spacing: 8) {
+                    Text("v\(game.version)")
+                    Text(game.formattedSize)
+                    if let date = game.releaseDate {
+                        Text(date)
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        }
+    }
 }
