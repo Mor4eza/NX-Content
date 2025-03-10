@@ -4,17 +4,17 @@
 //
 //  Created by Morteza on 3/8/25.
 //
-import SwiftUI
-import SwiftData
 import SDWebImage
 import SDWebImageSwiftUI
+import SwiftData
+import SwiftUI
 
 struct GameListView: View {
     @Environment(\.modelContext) private var modelContext
     @StateObject private var viewModel: ViewModel
     
     init() {
-        let context = ModelContext(Persistence.shared.container)
+        let context = Persistence.shared.container.mainContext
         _viewModel = StateObject(wrappedValue: ViewModel(modelContext: context))
     }
     
@@ -26,9 +26,9 @@ struct GameListView: View {
                 } else {
                     List {
                         ForEach(viewModel.games) { game in
-                            NavigationLink(destination: GameDetailView(game: game)) {
-                                GameRowView(game: game)
-                            }
+                            
+                            GameRowView(game: game)
+                                .environmentObject(viewModel)
                         }
                         
                         // Load more games when reaching the bottom
@@ -54,9 +54,9 @@ struct GameListView: View {
                         await viewModel.fetchGames(searchText: newValue)
                     }
                 }
-                
             }
             .task {
+                viewModel.fetchWishlist()
                 await viewModel.fetchGames() // Fetch the first page on app launch
             }
             
@@ -76,13 +76,13 @@ struct GameListView: View {
                                     Image(systemName: "checkmark")
                                 }
                             }
-                            
                         }
                     }
                 }
                 
-                ToolbarItem(placement: .bottomBar) {
-                    Button("Refresh Data") {
+                ToolbarItem(placement: .confirmationAction) {
+                    
+                    Button("Refresh Data", systemImage: "arrow.trianglehead.2.counterclockwise.rotate.90" ) {
                         Task { await viewModel.downloadGameData() }
                     }
                     .disabled(viewModel.isLoading)
@@ -101,11 +101,13 @@ struct GameListView: View {
                 Text(viewModel.errorMessage ?? "")
             }
         }
+        
     }
 }
 
 struct GameRowView: View {
     let game: Game
+    @EnvironmentObject private var viewModel: ViewModel
     
     private let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -114,35 +116,46 @@ struct GameRowView: View {
     }()
     
     var body: some View {
-        HStack(spacing: 12) {
-            WebImage(url: game.iconURL) { image in
-                image.resizable()
-                
-            } placeholder: {
-                Image(systemName: "photo.badge.exclamationmark.fill")
+        NavigationLink(destination: GameDetailView(game: game)) {
+            HStack(spacing: 12) {
+                WebImage(url: game.iconURL)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 50, height: 50)
                     .cornerRadius(8)
-            }
-                .indicator(.activity(style: .circular))
-                .scaledToFit()
-                .frame(width: 50, height: 50)
-                .cornerRadius(8)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(game.gameName)
-                    .font(.headline)
                 
-                HStack(spacing: 8) {
-                    Text("v\(game.version)")
-                    Text(game.formattedSize)
-                    if let date = game.releaseDate {
-                        Text(dateFormatter.string(from: date))
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(game.gameName)
+                        .font(.headline)
+                    
+                    HStack(spacing: 8) {
+                        Text("v\(game.version)")
+                        Text(game.formattedSize)
+                        if let date = game.releaseDate {
+                            Text(date, style: .date)
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                }
+                
+                Spacer()
+                
+                if viewModel.wishList.contains(where: { $0.game.id == game.id }) {
+                    Button(action: {
+                        viewModel.removeFromWishlist(game: game)
+                    }) {
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                    }
+                } else {
+                    Button(action: {
+                        viewModel.addToWishlist(game: game)
+                    }) {
+                        Image(systemName: "heart")
+                            .foregroundColor(.gray)
                     }
                 }
-                .font(.caption)
-                .foregroundStyle(.secondary)
             }
         }
     }

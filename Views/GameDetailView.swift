@@ -30,9 +30,32 @@ struct GameDetailView: View {
             }
             .padding()
         }
+        
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                if viewModel.wishList.contains(where: { $0.game.id == game.id }) {
+                    Button(action: {
+                        viewModel.removeFromWishlist(game: game)
+                    }) {
+                        Image(systemName: "heart.fill")
+                            .foregroundColor(.red)
+                    }
+                } else {
+                    Button(action: {
+                        viewModel.addToWishlist(game: game)
+                    }) {
+                        Image(systemName: "heart")
+                            .foregroundColor(.gray)
+                    }
+                }
+            }
+        }
         .navigationTitle("Game Details")
+        #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
+        #endif
         .task {
+            viewModel.fetchWishlist()
             await viewModel.fetchGameDetails(gameID: game.id)
         }
     }

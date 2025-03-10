@@ -12,6 +12,7 @@ import SwiftData
 @MainActor
 class ViewModel: ObservableObject {
     @Published var games: [Game] = []
+    @Published var wishList: [WishlistItem] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var searchText = ""
@@ -162,4 +163,65 @@ class ViewModel: ObservableObject {
         games.removeAll()
         hasMoreGames = true
     }
+    
+    //MARK: - Wish List
+    
+    // Add a game to the wish list
+        func addToWishlist(game: Game) {
+            let gameId = game.id
+            let descriptor = FetchDescriptor<WishlistItem>(
+                predicate: #Predicate {
+                    gameId == $0.game.id
+                }
+            )
+            
+            do {
+                let existingItems = try modelContext.fetch(descriptor)
+                if existingItems.isEmpty {
+                    let wishlistItem = WishlistItem(game: game)
+                    modelContext.insert(wishlistItem)
+                    try modelContext.save()
+                    print("Game added to wish list: \(game.gameName)")
+                    fetchWishlist()
+                } else {
+                    print("Game is already in the wish list: \(game.gameName)")
+                }
+            } catch {
+                errorMessage = "Failed to add game to wish list: \(error.localizedDescription)"
+                print("Error adding to wish list: \(error.localizedDescription)")
+            }
+        }
+        
+        // Remove a game from the wish list
+        func removeFromWishlist(game: Game) {
+            let gameId = game.id
+            let descriptor = FetchDescriptor<WishlistItem>(
+                predicate: #Predicate {
+                    gameId == $0.game.id
+                })
+            
+            do {
+                let items = try modelContext.fetch(descriptor)
+                for item in items {
+                    modelContext.delete(item)
+                }
+                try modelContext.save()
+                fetchWishlist()
+            } catch {
+                errorMessage = "Failed to remove game from wish list: \(error.localizedDescription)"
+            }
+        }
+        
+        // Fetch all wishlist items
+        func fetchWishlist() {
+            let descriptor = FetchDescriptor<WishlistItem>(
+                sortBy: [SortDescriptor(\WishlistItem.addedDate, order: .reverse)]
+            )
+            
+            do {
+                wishList = try modelContext.fetch(descriptor)
+            } catch {
+                errorMessage = "Failed to fetch wish list: \(error.localizedDescription)"
+            }
+        }
 }

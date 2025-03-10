@@ -15,7 +15,8 @@ final class Persistence {
     
     init() {
         do {
-            container = try ModelContainer(for: Game.self)
+            
+            container = try ModelContainer(for: Game.self, WishlistItem.self)
         } catch {
             fatalError("Failed to initialize ModelContainer: \(error)")
         }

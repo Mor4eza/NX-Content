@@ -11,8 +11,8 @@ import SwiftUI
 struct NX_ContentApp: App {
     var body: some Scene {
         WindowGroup {
-            GameListView()
+            MainTabView()
         }
-        .modelContainer(for: Game.self)
+        .modelContainer(Persistence.shared.container)
     }
 }
