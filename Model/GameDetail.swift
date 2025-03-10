@@ -10,7 +10,7 @@ import Foundation
 
 struct GameDetail: Codable {
     let description: String?
-    let id: String?
+    let id: String
     let name: String?
     let publisher: String?
     let releaseDate: String?

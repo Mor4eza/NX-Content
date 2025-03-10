@@ -103,6 +103,7 @@ class ViewModel: ObservableObject {
     }
     
     private func downloadAndParseJSON() async throws -> [Game] {
+        deleteAllGames()
         let url = URL(string: "https://raw.githubusercontent.com/ghost-land/NX-Missing/main/data/working.json")!
         let (data, _) = try await URLSession.shared.data(from: url)
         
@@ -164,64 +165,80 @@ class ViewModel: ObservableObject {
         hasMoreGames = true
     }
     
+    //Delete all games
+    func deleteAllGames() {
+        do {
+            let descriptor = FetchDescriptor<Game>()
+            let games = try modelContext.fetch(descriptor)
+            for game in games {
+                modelContext.delete(game)
+            }
+            try modelContext.save()
+            print("All games deleted from SwiftData.")
+        } catch {
+            errorMessage = "Failed to delete games: \(error.localizedDescription)"
+            print("Error deleting games: \(error.localizedDescription)")
+        }
+    }
+    
     //MARK: - Wish List
     
     // Add a game to the wish list
-        func addToWishlist(game: Game) {
-            let gameId = game.id
-            let descriptor = FetchDescriptor<WishlistItem>(
-                predicate: #Predicate {
-                    gameId == $0.game.id
-                }
-            )
-            
-            do {
-                let existingItems = try modelContext.fetch(descriptor)
-                if existingItems.isEmpty {
-                    let wishlistItem = WishlistItem(game: game)
-                    modelContext.insert(wishlistItem)
-                    try modelContext.save()
-                    print("Game added to wish list: \(game.gameName)")
-                    fetchWishlist()
-                } else {
-                    print("Game is already in the wish list: \(game.gameName)")
-                }
-            } catch {
-                errorMessage = "Failed to add game to wish list: \(error.localizedDescription)"
-                print("Error adding to wish list: \(error.localizedDescription)")
+    func addToWishlist(game: Game) {
+        let gameId = game.id
+        let descriptor = FetchDescriptor<WishlistItem>(
+            predicate: #Predicate {
+                gameId == $0.game.id
             }
-        }
+        )
         
-        // Remove a game from the wish list
-        func removeFromWishlist(game: Game) {
-            let gameId = game.id
-            let descriptor = FetchDescriptor<WishlistItem>(
-                predicate: #Predicate {
-                    gameId == $0.game.id
-                })
-            
-            do {
-                let items = try modelContext.fetch(descriptor)
-                for item in items {
-                    modelContext.delete(item)
-                }
+        do {
+            let existingItems = try modelContext.fetch(descriptor)
+            if existingItems.isEmpty {
+                let wishlistItem = WishlistItem(game: game)
+                modelContext.insert(wishlistItem)
                 try modelContext.save()
+                print("Game added to wish list: \(game.gameName)")
                 fetchWishlist()
-            } catch {
-                errorMessage = "Failed to remove game from wish list: \(error.localizedDescription)"
+            } else {
+                print("Game is already in the wish list: \(game.gameName)")
             }
+        } catch {
+            errorMessage = "Failed to add game to wish list: \(error.localizedDescription)"
+            print("Error adding to wish list: \(error.localizedDescription)")
         }
+    }
+    
+    // Remove a game from the wish list
+    func removeFromWishlist(game: Game) {
+        let gameId = game.id
+        let descriptor = FetchDescriptor<WishlistItem>(
+            predicate: #Predicate {
+                gameId == $0.game.id
+            })
         
-        // Fetch all wishlist items
-        func fetchWishlist() {
-            let descriptor = FetchDescriptor<WishlistItem>(
-                sortBy: [SortDescriptor(\WishlistItem.addedDate, order: .reverse)]
-            )
-            
-            do {
-                wishList = try modelContext.fetch(descriptor)
-            } catch {
-                errorMessage = "Failed to fetch wish list: \(error.localizedDescription)"
+        do {
+            let items = try modelContext.fetch(descriptor)
+            for item in items {
+                modelContext.delete(item)
             }
+            try modelContext.save()
+            fetchWishlist()
+        } catch {
+            errorMessage = "Failed to remove game from wish list: \(error.localizedDescription)"
         }
+    }
+    
+    // Fetch all wishlist items
+    func fetchWishlist() {
+        let descriptor = FetchDescriptor<WishlistItem>(
+            sortBy: [SortDescriptor(\WishlistItem.addedDate, order: .reverse)]
+        )
+        
+        do {
+            wishList = try modelContext.fetch(descriptor)
+        } catch {
+            errorMessage = "Failed to fetch wish list: \(error.localizedDescription)"
+        }
+    }
 }

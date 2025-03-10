@@ -22,7 +22,21 @@ struct GameListView: View {
         NavigationStack {
             Group {
                 if viewModel.games.isEmpty && !viewModel.isLoading {
-                    ContentUnavailableView("No Games Found", systemImage: "gamecontroller")
+                    VStack {
+                        
+                        ContentUnavailableView {
+                            Label("No Games Found", systemImage: "gamecontroller")
+                        } description: {
+                            Button("Get Games") {
+                                Task {
+                                    await viewModel.downloadGameData()
+                                    await viewModel.fetchGames()
+                                }
+                            }.buttonStyle(.bordered)
+                                .disabled(viewModel.isLoading)
+                        }
+                        
+                    }
                 } else {
                     List {
                         ForEach(viewModel.games) { game in
@@ -118,11 +132,19 @@ struct GameRowView: View {
     var body: some View {
         NavigationLink(destination: GameDetailView(game: game)) {
             HStack(spacing: 12) {
-                WebImage(url: game.iconURL)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 50, height: 50)
-                    .cornerRadius(8)
+                WebImage(url: game.iconURL) { image in
+                    image.resizable()
+                
+                } placeholder: {
+                    Image(systemName: "photo.badge.exclamationmark")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 50, height: 50)
+                        .cornerRadius(8)
+                }
+               .scaledToFit()
+                .frame(width: 50, height: 50)
+                .cornerRadius(8)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(game.gameName)

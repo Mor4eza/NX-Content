@@ -5,9 +5,9 @@
 //  Created by Morteza on 3/8/25.
 //
 
-import SwiftUI
 import SDWebImageSwiftUI
 import SwiftData
+import SwiftUI
 
 struct GameDetailView: View {
     let game: Game
@@ -18,8 +18,14 @@ struct GameDetailView: View {
             VStack(alignment: .leading, spacing: 20) {
                 if let gameDetail = viewModel.gameDetail {
                     headerSection(gameDetail: gameDetail)
-                    metadataSection(gameDetail: gameDetail)
+                    metadataSection(gameDetail: gameDetail, size: game.formattedSize)
+                    Divider()
+                    Text("Screenhots: ")
+                        .font(.title2)
                     screenshotsSection(gameDetail: gameDetail)
+                    Divider()
+                    Text("Description: ")
+                        .font(.title2)
                     descriptionSection(gameDetail: gameDetail)
                 } else if viewModel.isLoading {
                     ProgressView("Loading game details...")
@@ -51,9 +57,9 @@ struct GameDetailView: View {
             }
         }
         .navigationTitle("Game Details")
-        #if os(iOS)
+#if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
-        #endif
+#endif
         .task {
             viewModel.fetchWishlist()
             await viewModel.fetchGameDetails(gameID: game.id)
@@ -61,55 +67,100 @@ struct GameDetailView: View {
     }
     
     // MARK: - Header Section
+    
     private func headerSection(gameDetail: GameDetail) -> some View {
         HStack(spacing: 15) {
-            WebImage(url: game.iconURL)
-                .resizable()
-                .scaledToFit()
-                .frame(width: 80, height: 80)
-                .cornerRadius(12)
+            WebImage(url: game.iconURL) { image in
+                image.resizable()
+                
+            } placeholder: {
+                Image(systemName: "photo.badge.exclamationmark")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 50, height: 50)
+                    .cornerRadius(8)
+            }
+            .scaledToFit()
+            .frame(width: 50, height: 50)
+            .cornerRadius(8)
             
             VStack(alignment: .leading) {
                 Text(game.gameName)
-                    .font(.largeTitle.bold())
+                    .font(.title2.bold())
                 
-                HStack {
-                    Text(game.version == "0" ? "Full Game" : "Demo")
-                        .font(.subheadline)
-                        .padding(.horizontal, 8)
-                        .background(Color.blue.opacity(0.2))
-                        .cornerRadius(4)
-                    
-                    Text(game.formattedSize)
-                        .font(.subheadline)
-                }
+                Text(game.version)
+                    .font(.subheadline)
+                    .padding(.horizontal, 8)
+                    .background(Color.blue.opacity(0.2))
+                    .cornerRadius(4)
+                
             }
+            
         }
     }
     
     // MARK: - Metadata Section
-    private func metadataSection(gameDetail: GameDetail) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            if let publisher = gameDetail.publisher {
-                Text("Publisher: \(publisher)")
+    
+    private func metadataSection(gameDetail: GameDetail, size: String) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(alignment: .top, spacing: 8) {
+                if let publisher = gameDetail.publisher {
+                    VStack(alignment: .center) {
+                        Image(systemName: "building.columns")
+                        Spacer()
+                        Text(publisher)
+                    }
+                    Divider()
+                }
+                if let releaseDate = gameDetail.releaseDate {
+                    
+                    VStack(alignment: .center) {
+                        Image(systemName: "calendar")
+                        Spacer()
+                        Text(releaseDate)
+                    }
+                    Divider()
+                }
+                if let category = gameDetail.category {
+                    
+                    VStack(alignment: .center) {
+                        Image(systemName: "dice")
+                        Spacer()
+                        Text(category.joined(separator: ", "))
+                    }
+                    Divider()
+                    
+                }
+                if let languages = gameDetail.languages {
+                    VStack(alignment: .center) {
+                        Image(systemName: "translate")
+                        Spacer()
+                        Text(languages.joined(separator: ", "))
+                    }
+                    Divider()
+                }
+                if let numberOfPlayers = gameDetail.numberOfPlayers {
+                    VStack(alignment: .center) {
+                        Image(systemName: "person.fill")
+                        Spacer()
+                        Text("\(numberOfPlayers)")
+                    }
+                    Divider()
+                }
+                
+                VStack(alignment: .center) {
+                    Image(systemName: "opticaldiscdrive")
+                    Spacer()
+                    Text(size)
+                }
+                
             }
-            if let releaseDate = gameDetail.releaseDate {
-                Text("Release Date: \(releaseDate)")
-            }
-            if let category = gameDetail.category {
-                Text("Category: \(category.joined(separator: ", "))")
-            }
-            if let languages = gameDetail.languages {
-                Text("Languages: \(languages.joined(separator: ", "))")
-            }
-            if let numberOfPlayers = gameDetail.numberOfPlayers {
-                Text("Number of Players: \(numberOfPlayers)")
-            }
+            .font(.subheadline)
         }
-        .font(.subheadline)
     }
     
     // MARK: - Screenshots Section
+    
     private func screenshotsSection(gameDetail: GameDetail) -> some View {
         Group {
             if let screenshots = gameDetail.screens?.screenshots, !screenshots.isEmpty {
@@ -118,6 +169,7 @@ struct GameDetailView: View {
                         ForEach(screenshots, id: \.self) { screenshot in
                             WebImage(url: URL(string: screenshot))
                                 .resizable()
+                                .indicator(.activity)
                                 .scaledToFit()
                                 .frame(height: 200)
                                 .cornerRadius(10)
@@ -129,6 +181,7 @@ struct GameDetailView: View {
     }
     
     // MARK: - Description Section
+    
     private func descriptionSection(gameDetail: GameDetail) -> some View {
         Group {
             if let description = gameDetail.description {
@@ -140,5 +193,4 @@ struct GameDetailView: View {
             }
         }
     }
-   
 }
