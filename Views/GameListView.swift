@@ -39,7 +39,7 @@ struct GameListView: View {
                     }
                 } else {
                     List {
-                        ForEach(viewModel.games) { game in
+                        ForEach(viewModel.games.filter{$0.isBaseGame}) { game in
                             
                             GameRowView(game: game)
                                 .environmentObject(viewModel)
@@ -134,7 +134,6 @@ struct GameRowView: View {
             HStack(spacing: 12) {
                 WebImage(url: game.iconURL) { image in
                     image.resizable()
-                
                 } placeholder: {
                     Image(systemName: "photo.badge.exclamationmark")
                         .resizable()
@@ -142,7 +141,7 @@ struct GameRowView: View {
                         .frame(width: 50, height: 50)
                         .cornerRadius(8)
                 }
-               .scaledToFit()
+                .scaledToFit()
                 .frame(width: 50, height: 50)
                 .cornerRadius(8)
                 

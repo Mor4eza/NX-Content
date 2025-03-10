@@ -10,7 +10,7 @@ import SwiftData
 @Model
 final class Game: Identifiable, Decodable {
     @Attribute(.unique) var id: String
-    var gameName: String 
+    var gameName: String
     var version: String
     var size: Int
     var releaseDate: Date?
@@ -54,7 +54,51 @@ final class Game: Identifiable, Decodable {
             String(format: "%.2f MB", Double(size) / (1024 * 1024))
     }
     
+    // MARK: - Base Title ID Logic
+    
+    var isBaseGame: Bool {
+        return id.hasSuffix("000")
+    }
+    
+    var baseTitleId: String {
+        // For base titles (ending in 000), return as is
+        if id.hasSuffix("000") {
+            return id
+        }
+        
+        // For updates (ending in 800), use the base title ID
+        if id.hasSuffix("800") {
+            return String(id.dropLast(3)) + "000"
+        }
+        
+        // For DLCs, change the fourth-to-last digit and set last 3 digits to 000
+        let fourthFromEnd = id[id.index(id.endIndex, offsetBy: -4)]
+        let prevChar: String
+        if fourthFromEnd >= "1" && fourthFromEnd <= "9" {
+            prevChar = String(Int(String(fourthFromEnd))! - 1)
+        } else if fourthFromEnd >= "b" && fourthFromEnd <= "z" {
+            prevChar = String(UnicodeScalar(fourthFromEnd.unicodeScalars.first!.value - 1)!)
+        } else if fourthFromEnd >= "B" && fourthFromEnd <= "Z" {
+            prevChar = String(UnicodeScalar(fourthFromEnd.unicodeScalars.first!.value - 1)!)
+        } else {
+            prevChar = String(fourthFromEnd)
+        }
+        return String(id.dropLast(4)) + prevChar + "000"
+    }
+    
+    // MARK: - Visual Assets
+    
     var iconURL: URL? {
-        URL(string: "https://api.nlib.cc/nx/\(id)/icon/128/128")
+        URL(string: "https://api.nlib.cc/nx/\(baseTitleId)/icon/128/128")
+    }
+    
+    var bannerURL: URL? {
+        URL(string: "https://api.nlib.cc/nx/\(baseTitleId)/banner/1280/720")
+    }
+    
+    var screenshotURLs: [URL] {
+        (1...6).compactMap { index in
+            URL(string: "https://api.nlib.cc/nx/\(baseTitleId)/screen/\(index)")
+        }
     }
 }

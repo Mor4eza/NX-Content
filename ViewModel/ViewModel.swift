@@ -89,6 +89,18 @@ class ViewModel: ObservableObject {
         }
     }
     
+    func getAllContentsFromDB() -> [Game] {
+        var allContent = [Game]()
+        let descriptor = FetchDescriptor<Game>(predicate: nil)
+        do {
+            let game = try modelContext.fetch(descriptor)
+            allContent.append(contentsOf: game)
+        } catch {
+            print("failed to load data")
+        }
+        return allContent
+    }
+    
     func downloadGameData() async {
         isLoading = true
         defer { isLoading = false }
@@ -180,6 +192,27 @@ class ViewModel: ObservableObject {
             print("Error deleting games: \(error.localizedDescription)")
         }
     }
+    
+    func getRelatedContent(for game: Game) -> (base: Game?, updates: [Game], dlcs: [Game]) {
+            let basePrefix = String(game.id.prefix(12))
+        
+            // Find all related items
+            let relatedItems =  getAllContentsFromDB().filter { String($0.id.prefix(12)) == basePrefix }
+            
+            // Get base game (should be the one matching baseTitleId)
+            let base = relatedItems.first { $0.id == game.baseTitleId }
+            
+            // Get updates (ending with 800)
+            let updates = relatedItems.filter { $0.id.hasSuffix("800") }
+                .sorted { $0.version.localizedCompare($1.version) == .orderedDescending }
+            
+            // Get DLCs (not base and not updates)
+            let dlcs = relatedItems.filter {
+                !$0.id.hasSuffix("000") && !$0.id.hasSuffix("800")
+            }.sorted { $0.id.localizedCompare($1.id) == .orderedAscending }
+            
+            return (base, updates, dlcs)
+        }
     
     //MARK: - Wish List
     

@@ -14,7 +14,8 @@ struct GameDetailView: View {
     @StateObject private var viewModel = ViewModel(modelContext: ModelContext(Persistence.shared.container))
     @State private var zoomScale: CGFloat = 1.0
     @State private var currentIndex: Int = 0
-    
+    @State private var relatedContent: (base: Game?, updates: [Game], dlcs: [Game]) = (nil, [], [])
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -23,6 +24,22 @@ struct GameDetailView: View {
                     metadataSection(gameDetail: gameDetail, size: game.formattedSize)
                     screenshotsSection(gameDetail: gameDetail)
                     descriptionSection(gameDetail: gameDetail)
+                    Divider()
+                    if !relatedContent.updates.isEmpty {
+                        Text("Updates")
+                            .font(.title2)
+                        ForEach(relatedContent.updates) { update in
+                            GameRowView(game: update)
+                        }
+                    }
+                    
+                    if !relatedContent.dlcs.isEmpty {
+                        Text("DLCs")
+                            .font(.title2)
+                        ForEach(relatedContent.dlcs) { dlc in
+                            GameRowView(game: dlc)
+                        }
+                    }
                 } else if viewModel.isLoading {
                     ProgressView("Loading game details...")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -59,6 +76,7 @@ struct GameDetailView: View {
         .task {
             viewModel.fetchWishlist()
             await viewModel.fetchGameDetails(gameID: game.id)
+            relatedContent = viewModel.getRelatedContent(for: game)
         }
     }
     
