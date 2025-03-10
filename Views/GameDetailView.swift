@@ -12,6 +12,8 @@ import SwiftUI
 struct GameDetailView: View {
     let game: Game
     @StateObject private var viewModel = ViewModel(modelContext: ModelContext(Persistence.shared.container))
+    @State private var zoomScale: CGFloat = 1.0
+    @State private var currentIndex: Int = 0
     
     var body: some View {
         ScrollView {
@@ -19,13 +21,7 @@ struct GameDetailView: View {
                 if let gameDetail = viewModel.gameDetail {
                     headerSection(gameDetail: gameDetail)
                     metadataSection(gameDetail: gameDetail, size: game.formattedSize)
-                    Divider()
-                    Text("Screenhots: ")
-                        .font(.title2)
                     screenshotsSection(gameDetail: gameDetail)
-                    Divider()
-                    Text("Description: ")
-                        .font(.title2)
                     descriptionSection(gameDetail: gameDetail)
                 } else if viewModel.isLoading {
                     ProgressView("Loading game details...")
@@ -162,19 +158,47 @@ struct GameDetailView: View {
     // MARK: - Screenshots Section
     
     private func screenshotsSection(gameDetail: GameDetail) -> some View {
+      
         Group {
             if let screenshots = gameDetail.screens?.screenshots, !screenshots.isEmpty {
-                ScrollView(.horizontal) {
-                    HStack(spacing: 10) {
-                        ForEach(screenshots, id: \.self) { screenshot in
-                            WebImage(url: URL(string: screenshot))
+                Divider()
+                Text("Screenhots: ")
+                    .font(.title2)
+                VStack(spacing: 8) {
+                    TabView(selection: $currentIndex) {
+                        ForEach(0..<screenshots.count, id: \.self) { index in
+                            WebImage(url: URL(string: screenshots[index]))
                                 .resizable()
                                 .indicator(.activity)
                                 .scaledToFit()
                                 .frame(height: 200)
                                 .cornerRadius(10)
+                                .scaleEffect(zoomScale)
+                                .gesture(
+                                    MagnificationGesture()
+                                        .onChanged { value in
+                                            zoomScale = value
+                                        }
+                                        .onEnded { value in
+                                            withAnimation {
+                                                zoomScale = 1.0
+                                            }
+                                        }
+                                )
+                                .tag(index)
                         }
                     }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+                    .frame(height: 220)
+                    
+                    HStack {
+                        ForEach(0..<screenshots.count, id: \.self) { index in
+                            Circle()
+                                .fill(index == currentIndex ? Color.blue : Color.gray)
+                                .frame(width: 8, height: 8)
+                        }
+                    }
+                    .padding(.top, 10)
                 }
             }
         }
@@ -185,6 +209,9 @@ struct GameDetailView: View {
     private func descriptionSection(gameDetail: GameDetail) -> some View {
         Group {
             if let description = gameDetail.description {
+                Divider()
+                Text("Description: ")
+                    .font(.title2)
                 Text(description)
                     .font(.body)
                     .lineLimit(nil)
