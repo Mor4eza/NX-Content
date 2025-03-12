@@ -19,6 +19,7 @@ class ViewModel: ObservableObject {
     @Published var selectedSortOption: SortOption = .releaseDateDescending
     @Published var gameDetail: GameDetail?
     @Published var hasMoreGames = true
+    @Published var downloadItems: [DownloadItem] = []
     
     private var currentPage = 0
     private let pageSize = 20 // Number of games to fetch per page
@@ -50,6 +51,10 @@ class ViewModel: ObservableObject {
                 return SortDescriptor(\Game.size, order: .reverse)
             }
         }
+    }
+    
+    private struct ApiResponse: Decodable {
+        let data: [Game]
     }
     
     // Date formatter for parsing release dates
@@ -102,52 +107,30 @@ class ViewModel: ObservableObject {
     }
     
     func downloadGameData() async {
-        isLoading = true
-        defer { isLoading = false }
-        
-        do {
-            let games = try await downloadAndParseJSON()
-            try await updateReleaseDates(for: games)
-            errorMessage = nil
-        } catch {
-            errorMessage = error.localizedDescription
-        }
-    }
+           isLoading = true
+           defer { isLoading = false }
+           
+           do {
+               let games = try await downloadAndParseJSON()
+               for game in games {
+                   modelContext.insert(game)
+               }
+               try modelContext.save()
+               errorMessage = nil
+           } catch {
+               errorMessage = error.localizedDescription
+           }
+       }
     
     private func downloadAndParseJSON() async throws -> [Game] {
         deleteAllGames()
-        let url = URL(string: "https://raw.githubusercontent.com/ghost-land/NX-Missing/main/data/working.json")!
+        let url = URL(string: "https://tinfoil.media/Title/ApiJson/")!
         let (data, _) = try await URLSession.shared.data(from: url)
         
         let decoder = JSONDecoder()
-        let gameDict = try decoder.decode([String: Game].self, from: data)
-        
-        return gameDict.map { key, value in
-            let game = value
-            game.id = key
-            return game
-        }
+        let apiResponse = try decoder.decode(ApiResponse.self, from: data)
+        return apiResponse.data
     }
-    
-    private func updateReleaseDates(for games: [Game]) async throws {
-        let url = URL(string: "https://raw.githubusercontent.com/ghost-land/NX-Missing/main/data/titles_db.txt")!
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let text = String(decoding: data, as: UTF8.self)
-        
-        let dateMap = text.components(separatedBy: .newlines).reduce(into: [String: Date]()) { result, line in
-            let components = line.components(separatedBy: "|")
-            if components.count >= 2, let date = dateFormatter.date(from: components[1]) {
-                result[components[0]] = date
-            }
-        }
-        
-        for game in games {
-            game.releaseDate = dateMap[game.id]
-            modelContext.insert(game)
-        }
-        try modelContext.save()
-    }
-    
     
     // Fetch game details from the API
     func fetchGameDetails(gameID: String) async {

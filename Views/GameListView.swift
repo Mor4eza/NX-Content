@@ -150,7 +150,6 @@ struct GameRowView: View {
                         .font(.headline)
                     
                     HStack(spacing: 8) {
-                        Text("v\(game.version)")
                         Text(game.formattedSize)
                         if let date = game.releaseDate {
                             Text(date, style: .date)

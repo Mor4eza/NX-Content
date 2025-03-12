@@ -76,7 +76,7 @@ struct GameDetailView: View {
         .task {
             viewModel.fetchWishlist()
             await viewModel.fetchGameDetails(gameID: game.id)
-            relatedContent = viewModel.getRelatedContent(for: game)
+//            relatedContent = viewModel.getRelatedContent(for: game)
         }
     }
     
@@ -102,7 +102,7 @@ struct GameDetailView: View {
                 Text(game.gameName)
                     .font(.title2.bold())
                 
-                Text(game.version)
+                Text("v\(gameDetail.version ?? 0)")
                     .font(.subheadline)
                     .padding(.horizontal, 8)
                     .background(Color.blue.opacity(0.2))

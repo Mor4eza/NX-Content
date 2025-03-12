@@ -18,6 +18,7 @@
 		B41EF51C2D7DC2D500AE7B73 /* WishlistItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF51B2D7DC2D500AE7B73 /* WishlistItem.swift */; };
 		B41EF51E2D7DC36800AE7B73 /* WishlistView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF51D2D7DC36800AE7B73 /* WishlistView.swift */; };
 		B41EF5202D7EBFD200AE7B73 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF51F2D7EBFD200AE7B73 /* MainTabView.swift */; };
+		B41EF5222D8168C600AE7B73 /* DownloadItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = B41EF5212D8168C600AE7B73 /* DownloadItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		B41EF51B2D7DC2D500AE7B73 /* WishlistItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistItem.swift; sourceTree = "<group>"; };
 		B41EF51D2D7DC36800AE7B73 /* WishlistView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WishlistView.swift; sourceTree = "<group>"; };
 		B41EF51F2D7EBFD200AE7B73 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		B41EF5212D8168C600AE7B73 /* DownloadItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -118,6 +120,7 @@
 		B41EF5022D7C9C7500AE7B73 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				B41EF5212D8168C600AE7B73 /* DownloadItem.swift */,
 				B41EF51B2D7DC2D500AE7B73 /* WishlistItem.swift */,
 				B41EF5042D7C9CB100AE7B73 /* Game.swift */,
 				B41EF5082D7CA89A00AE7B73 /* GameDetail.swift */,
@@ -211,6 +214,7 @@
 				B41EF5202D7EBFD200AE7B73 /* MainTabView.swift in Sources */,
 				B41EF5052D7C9D4800AE7B73 /* ViewModel.swift in Sources */,
 				B41EF4FD2D7C93E700AE7B73 /* GameListView.swift in Sources */,
+				B41EF5222D8168C600AE7B73 /* DownloadItem.swift in Sources */,
 				B41EF5092D7CA89A00AE7B73 /* GameDetail.swift in Sources */,
 				B41EF5062D7C9D5000AE7B73 /* Game.swift in Sources */,
 			);
@@ -342,7 +346,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"NX-Content/Preview Content\"";
-				DEVELOPMENT_TEAM = K5YX62U8XR;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -382,7 +386,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"NX-Content/Preview Content\"";
-				DEVELOPMENT_TEAM = K5YX62U8XR;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
