@@ -68,6 +68,17 @@ struct GameDetailView: View {
                     }
                 }
             }
+            
+            ToolbarItem(placement: .bottomBar) {
+                Button(action: {
+                    if let url = game.downloadURL {
+                        DownloadManager.shared.startDownload(game: game)
+                    }
+                }) {
+                    Label("Download", systemImage: "arrow.down.circle")
+                }
+                .disabled(game.downloadURL == nil)
+            }
         }
         .navigationTitle("Game Details")
 #if os(iOS)

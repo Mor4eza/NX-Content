@@ -112,6 +112,8 @@ class ViewModel: ObservableObject {
            
            do {
                let games = try await downloadAndParseJSON()
+               let tinfoilData = try await downloadTinfoilData()
+               mapDownloadUrls(tinfoilData: tinfoilData, games: games)
                for game in games {
                    modelContext.insert(game)
                }
@@ -256,5 +258,39 @@ class ViewModel: ObservableObject {
         } catch {
             errorMessage = "Failed to fetch wish list: \(error.localizedDescription)"
         }
+    }
+}
+
+extension ViewModel {
+    private func downloadTinfoilData() async throws -> TinfoilResponse {
+        let url = URL(string: "https://tinfoil.ultranx.ru/tinfoil")!
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return try JSONDecoder().decode(TinfoilResponse.self, from: data)
+    }
+
+    private func mapDownloadUrls(tinfoilData: TinfoilResponse, games: [Game]) {
+        for file in tinfoilData.files {
+            // Extract game ID from filename (e.g., [01001E500F7FC000])
+            let pattern = "\\[([A-Za-z0-9]{16})\\]"
+            let regex = try? NSRegularExpression(pattern: pattern)
+            if let match = regex?.firstMatch(in: file.url, range: NSRange(file.url.startIndex..., in: file.url)) {
+                let gameId = String(file.url[Range(match.range(at: 1), in: file.url)!])
+                
+                if let game = games.first(where: { $0.id == gameId }) {
+                    game.downloadURL = file.url
+                    game.fileSize = file.size
+                }
+            }
+        }
+    }
+
+    struct TinfoilResponse: Decodable {
+        let files: [TinfoilFile]
+        let success: String
+    }
+
+    struct TinfoilFile: Decodable {
+        let size: Int
+        let url: String
     }
 }

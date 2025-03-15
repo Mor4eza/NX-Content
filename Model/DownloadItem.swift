@@ -6,24 +6,22 @@ import Foundation
 import SwiftData
 
 @Model
-final class DownloadItem {
+class DownloadItem: Identifiable {
+    let id: String
     var gameId: String
-    var url: String
-    var fileName: String
-    var fileSize: Int
-    var downloadedBytes: Int
-    var isPaused: Bool
-    var isCompleted: Bool
-    var createdAt: Date
+    var localFileURL: URL?
+    var progress: Double
+    var status: DownloadStatus
+    var resumeData: Data? // Store resume data instead of the task
     
-    init(gameId: String, url: String, fileName: String, fileSize: Int, downloadedBytes: Int = 0, isPaused: Bool = false, isCompleted: Bool = false) {
+    init(gameId: String) {
+        self.id = UUID().uuidString
         self.gameId = gameId
-        self.url = url
-        self.fileName = fileName
-        self.fileSize = fileSize
-        self.downloadedBytes = downloadedBytes
-        self.isPaused = isPaused
-        self.isCompleted = isCompleted
-        self.createdAt = Date()
+        self.progress = 0.0
+        self.status = .queued
+    }
+    
+    enum DownloadStatus: String, Codable {
+        case queued, downloading, paused, completed, failed
     }
 }

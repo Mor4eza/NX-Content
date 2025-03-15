@@ -24,6 +24,11 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Wishlist", systemImage: "heart.fill")
                 }
-        }
+            DownloadManagerView()
+                           .tabItem {
+                               Label("Downloads", systemImage: "arrow.down.circle")
+                           }
+                   }
+                   .environmentObject(DownloadManager.shared)
     }
 }

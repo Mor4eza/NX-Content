@@ -15,6 +15,8 @@ final class Game: Identifiable, Decodable {
     var size: Int
     var releaseDate: Date?
     var publisher: String?
+    var downloadURL: String?
+    var fileSize: Int?
     
     enum CodingKeys: String, CodingKey {
         case id
@@ -22,6 +24,7 @@ final class Game: Identifiable, Decodable {
         case size
         case releaseDate = "release_date"
         case publisher
+        case downloadURL, fileSize
     }
     
     init(id: String, gameName: String, version: String, size: Int, releaseDate: Date? = nil, publisher: String? = nil) {
