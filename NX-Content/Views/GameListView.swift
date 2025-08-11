@@ -22,21 +22,22 @@ struct GameListView: View {
         NavigationStack {
             Group {
                 if viewModel.games.isEmpty && !viewModel.isLoading {
-                    VStack {
-                        
                         ContentUnavailableView {
                             Label("No Games Found", systemImage: "gamecontroller")
                         } description: {
-                            Button("Get Games") {
-                                Task {
-                                    await viewModel.downloadGameData()
-                                    await viewModel.fetchGames()
+                            Button(viewModel.searchText.isEmpty ? "Get Games" :"Reset Search") {
+                                if viewModel.searchText.isEmpty {
+                                    Task {
+                                        await viewModel.downloadGameData()
+                                        await viewModel.fetchGames()
+                                    }
+                                } else {
+                                    viewModel.searchText = ""
                                 }
                             }.buttonStyle(.bordered)
                                 .disabled(viewModel.isLoading)
                         }
-                        
-                    }
+              
                 } else {
                     List {
                         ForEach(viewModel.games.filter{$0.isBaseGame}) { game in
@@ -56,6 +57,7 @@ struct GameListView: View {
                                 }
                         }
                     }
+                    .listStyle(.plain)
                 }
             }
             .navigationTitle("NX Games")

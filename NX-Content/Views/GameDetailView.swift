@@ -69,7 +69,7 @@ struct GameDetailView: View {
                 }
             }
             
-            ToolbarItem(placement: .bottomBar) {
+            ToolbarItem(placement: .navigation) {
                 Button(action: {
                     if let url = game.downloadURL {
                         DownloadManager.shared.startDownload(game: game)
@@ -187,11 +187,10 @@ struct GameDetailView: View {
     // MARK: - Screenshots Section
     
     private func screenshotsSection(gameDetail: GameDetail) -> some View {
-      
         Group {
             if let screenshots = gameDetail.screens?.screenshots, !screenshots.isEmpty {
                 Divider()
-                Text("Screenhots: ")
+                Text("Screenshots")
                     .font(.title2)
                 VStack(spacing: 8) {
                     TabView(selection: $currentIndex) {

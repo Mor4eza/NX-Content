@@ -71,7 +71,6 @@ class ViewModel: ObservableObject {
     func fetchGames(searchText: String = "") async {
         isLoading = true
         defer { isLoading = false }
-        
         var descriptor = FetchDescriptor<Game>(
             predicate: searchText.isEmpty ? nil : #Predicate { game in
                 game.gameName.localizedStandardContains(searchText)
@@ -86,7 +85,11 @@ class ViewModel: ObservableObject {
             if newGames.isEmpty {
                 hasMoreGames = false // No more games to load
             } else {
-                games.append(contentsOf: newGames)
+                if currentPage == 0 {
+                    games = newGames
+                } else {
+                    games.append(contentsOf: newGames)
+                }
                 currentPage += 1
             }
         } catch {
