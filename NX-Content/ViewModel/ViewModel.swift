@@ -115,8 +115,8 @@ class ViewModel: ObservableObject {
            
            do {
                let games = try await downloadAndParseJSON()
-               let tinfoilData = try await downloadTinfoilData()
-               mapDownloadUrls(tinfoilData: tinfoilData, games: games)
+//               let tinfoilData = try await downloadTinfoilData()
+//               mapDownloadUrls(tinfoilData: tinfoilData, games: games)
                for game in games {
                    modelContext.insert(game)
                }
@@ -247,6 +247,21 @@ class ViewModel: ObservableObject {
             fetchWishlist()
         } catch {
             errorMessage = "Failed to remove game from wish list: \(error.localizedDescription)"
+        }
+    }
+    
+    // remove all wishlist items
+    func removeAllFromWishlist() {
+        let descriptor = FetchDescriptor<WishlistItem>()
+        do {
+            let items = try modelContext.fetch(descriptor)
+            for item in items {
+                modelContext.delete(item)
+            }
+            try modelContext.save()
+            fetchWishlist()
+        } catch {
+            errorMessage = "Failed to remove all games from wish list: \(error.localizedDescription)"
         }
     }
     

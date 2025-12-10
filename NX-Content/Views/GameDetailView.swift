@@ -69,7 +69,7 @@ struct GameDetailView: View {
                 }
             }
             
-            ToolbarItem(placement: .navigation) {
+            ToolbarItem(placement: .automatic) {
                 Button(action: {
                     if let url = game.downloadURL {
                         DownloadManager.shared.startDownload(game: game)
@@ -216,9 +216,12 @@ struct GameDetailView: View {
                                 .tag(index)
                         }
                     }
-                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .automatic))
+#if os(iOS)
+                    .tabViewStyle(.page)
+                    .indexViewStyle(.page(backgroundDisplayMode: .always))
+#endif
                     .frame(height: 220)
-                    
+#if os(macOS)
                     HStack {
                         ForEach(0..<screenshots.count, id: \.self) { index in
                             Circle()
@@ -227,6 +230,7 @@ struct GameDetailView: View {
                         }
                     }
                     .padding(.top, 10)
+#endif
                 }
             }
         }
